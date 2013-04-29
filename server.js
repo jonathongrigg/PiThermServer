@@ -43,8 +43,8 @@ function insertTemp(data){
 }
 
 // Read current temperature from sensor
-function readTemp(callback){
-   console.log("About to read temp");
+function readTempFirst(callback){
+   console.log("About to read temp first");
    alamode.on("open", function () {
       // Request the temperature (an average of the coming second)
       alamode.write("T", function(err, results) {
@@ -64,14 +64,38 @@ function readTemp(callback){
          // Execute call back with data
          callback(data);
       });
-      console.log("Reading temperature");
+      console.log("Reading temperature first");
    });
+};
+
+// Read current temperature from sensor
+function readTemp(callback){
+   console.log("About to read temp");
+   // Request the temperature (an average of the coming second)
+   alamode.write("T", function(err, results) {
+      if (err) {
+         console.error(err);
+         process.exit(1);
+      }
+   });
+   alamode.on("data", function(data) {
+      // Add date/time to temperature
+      var data = {
+         temperature_record:[{
+         unix_time: Date.now(),
+         celsius: parseInt(data)
+         }]};
+      
+      // Execute call back with data
+      callback(data);
+   });
+   console.log("Reading temperature");
 };
 
 // Create a wrapper function which we'll use specifically for logging
 function logTemp(interval){
       // Call the readTemp function with the insertTemp function as output to get initial reading
-      readTemp(insertTemp);
+      readTempFirst(insertTemp);
       // Set the repeat interval (milliseconds). Third argument is passed as callback function to first (i.e. readTemp(insertTemp)).
       setInterval(readTemp, interval, insertTemp);
 };
