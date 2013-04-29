@@ -198,4 +198,4 @@ console.log('Server is logging to database at '+msecs+'ms intervals');
 // Enable server
 server.listen(80);
 // Log message
-console.log('Server running at http://localhost:8000');
+console.log('Server running at http://localhost');
