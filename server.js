@@ -14,6 +14,8 @@ var fs = require('fs');
 var sys = require('sys');
 var http = require('http');
 var sqlite3 = require('sqlite3');
+var serialport = require("serialport");
+var SerialPort = serialport.SerialPort;
 
 // Use node-static module to server chart for client-side dynamic graph
 var nodestatic = require('node-static');
@@ -23,6 +25,12 @@ var staticServer = new nodestatic.Server(".");
 
 // Setup database connection for logging
 var db = new sqlite3.Database('./piTemps.db');
+
+// Connect to the alamode via serial
+var alamode = new SerialPort("/dev/ttyS0", {
+        // looking for a newline
+        parser: serialport.parsers.readline("\r\n")
+});
 
 // Write a single temperature record in JSON format to database table.
 function insertTemp(data){
@@ -36,31 +44,25 @@ function insertTemp(data){
 
 // Read current temperature from sensor
 function readTemp(callback){
-   fs.readFile('/sys/bus/w1/devices/28-00000400a88a/w1_slave', function(err, buffer)
-	{
-      if (err){
-         console.error(err);
-         process.exit(1);
-      }
-
-      // Read data from file (using fast node ASCII encoding).
-      var data = buffer.toString('ascii').split(" "); // Split by space
-
-      // Extract temperature from string and divide by 1000 to give celsius
-      var temp  = parseFloat(data[data.length-1].split("=")[1])/1000.0;
-
-      // Round to one decimal place
-      temp = Math.round(temp * 10) / 10;
-
-      // Add date/time to temperature
-   	var data = {
+   alamode.on("open", function () {
+      // Request the temperature (an average of the coming second)
+      alamode.write("T", function(err, results) {
+         if (err) {
+            console.error(err);
+            process.exit(1);
+         }
+      });
+      alamode.on("data", function(data) {
+         // Add date/time to temperature
+         var data = {
             temperature_record:[{
             unix_time: Date.now(),
-            celsius: temp
+            celsius: parseInt(temp)
             }]};
-
-      // Execute call back with data
-      callback(data);
+         
+         // Execute call back with data
+         callback(data);
+      });
    });
 };
 
