@@ -59,7 +59,7 @@ function readTempFirst(callback){
             unix_time: Date.now(),
             celsius: parseInt(data)
             }]};
-         
+         console.log(data);
          // Execute call back with data
          callback(data);
       });
@@ -82,7 +82,7 @@ function readTemp(callback){
          unix_time: Date.now(),
          celsius: parseInt(data)
          }]};
-      
+      console.log(data);
       // Execute call back with data
       callback(data);
    });
