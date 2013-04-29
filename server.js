@@ -63,6 +63,7 @@ function readTemp(callback){
          // Execute call back with data
          callback(data);
       });
+      console.log("Reading temperature");
    });
 };
 
