@@ -57,7 +57,7 @@ function readTemp(callback){
          var data = {
             temperature_record:[{
             unix_time: Date.now(),
-            celsius: parseInt(temp)
+            celsius: parseInt(data)
             }]};
          
          // Execute call back with data
